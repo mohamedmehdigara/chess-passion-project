@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, moveInfo , useState } from 'react'
 import Chessboard from 'chessboardjsx'
 import * as Chess from 'chess.js'
 import useSound from 'use-sound'
@@ -10,6 +10,7 @@ import '../App.css'
 import { db, onSnapshot, doc, setDoc, getDoc } from '../firebase'
 // import { useParams } from 'react-router-dom'
 import { auth, signOut } from '../firebase'
+import React from "react"
 
 const STARTING_POSITION =
   'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
@@ -22,10 +23,9 @@ function ChessRoom() {
   const [firebaseChessBoardPgn, setFirebaseChessBoardPgn] = useState(null)
 
   const [undoMovesHistory, setUndoMovesHistory] = useState([])
-  const [firebaseGameId, setFirebaseGameId] = useState(GAME_DOC_ID)
+  const [firebaseGameId ] = useState(GAME_DOC_ID)
   const [firebaseGamePosition, setFirebaseGamePosition] =
     useState(STARTING_POSITION)
-  const notationEndRef = useRef(null)
   const [currentSideToMove, setCurrentSideToMove] = useState('w')
   const [currentBoardWidth, setCurrentBoardWidth] = useState(560) // default width
   const [gamePlayers, setGamePlayers] = useState([
@@ -68,10 +68,12 @@ function ChessRoom() {
     // who's turn is it to move?
     // debugger
     const newChessBoard = new Chess()
-    const _ =
-      firebaseChessBoardPgn.length !== 0
-        ? newChessBoard.load_pgn(firebaseChessBoardPgn)
-        : null
+    
+      if (firebaseChessBoardPgn.length !== 0){
+         return newChessBoard.load_pgn(firebaseChessBoardPgn)
+        
+      }else {
+     return  null
 
     const moveInfo = newChessBoard.move({
       from: sourceSquare,
@@ -81,7 +83,7 @@ function ChessRoom() {
 
     setFirebaseChessBoard(newChessBoard)
     setFirebaseChessBoardHistory(newChessBoard.history())
-
+  }
     if (moveInfo) {
       setLastMove({ sourceSquare: sourceSquare, targetSquare: targetSquare })
       setCurrentSideToMove(newChessBoard.fen().split(' ')[1])
@@ -232,7 +234,7 @@ function ChessRoom() {
       <p style={{ color: '#BABABA', fontSize: 20 }}>{turn}</p>
     ))
   }
-
+  
   // useEffect(() => {
   //   notationEndRef?.current?.scrollIntoView({ behavior: 'smooth' })
   // })
